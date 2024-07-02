@@ -2,6 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const morgan = require('morgan')
 const mongoose = require('mongoose')
+const config = require('./utils/config.js')
 
 require('dotenv').config()
 
