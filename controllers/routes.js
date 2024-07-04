@@ -6,10 +6,10 @@ const bcrypt = require('bcrypt')
 const User = require('../models/User.js')
 
 router.post("/register", async (req, res) => {
-    const {email, pass} = req.body;
-    const hashedPass = bcrypt.hash(pass, 10);
+    const {email, password} = req.body;
+    const hashedPass = await bcrypt.hash(password, 10);
 
-    const exists = await User.find({email})
+    const exists = await User.find({email})[0]
     if(exists) {
         return res.status(400).json({error: 'Email already in use...'})
     }
@@ -19,6 +19,7 @@ router.post("/register", async (req, res) => {
         console.log(`User succesfully created: ${result}`)
         return res.status(201).json({message: 'User registered succesfully...'})
     }).catch(err => {
+        console.log(err)
         return res.status(500).json({error: 'An error occurred when registering a new user...'})
     })
 })
@@ -26,20 +27,20 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
     const {email, password} = req.body;
     
-    const user = await User.find({email})[0]
-    if(!user) {
+    const user = await User.find({email})
+    if(!user[0]) {
         return res.status(401).json({error: 'Invalid user or password...'})
     }
 
-    if(await bcrypt.compare(password, user.password)) {
+    if(await bcrypt.compare(password, user[0].password)) {
         let payload = {
             email: user.email,
             id: user._id
         }
 
-        var token = jwt.sign(payload, process.env.SECRET, { algorithm: 'RS256', expiresIn: '1h' });
+        var token = jwt.sign(payload, process.env.SECRET, { expiresIn: '1h' });
 
-        return res.cookie('token', token, {httpOnly: true}).status(200).json({message: 'Logged in succesfully...'})
+        return res.cookie('token', token, {httpOnly: true, sameSite: 'strict'}).status(200).json({message: 'Logged in succesfully...'})
     } else {
         return res.status(401).json({error: 'Invalid user or password...'})
     }
