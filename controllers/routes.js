@@ -50,14 +50,14 @@ router.post("/login", async (req, res) => {
 })
 
 router.post("/post", (req, res) => {
-    const {content} = req.body;
+    const {content, channel, color} = req.body;
 
     const user = jwt.verify(req.cookies.token, process.env.SECRET)
     if(user === undefined) {
         return res.status(405).json({error: 'Unauthorized user...'})
     }
 
-    let post = new Post({content, identifier: crypto.randomUUID()})
+    let post = new Post({content, channel, color, identifier: crypto.randomUUID()})
     post.save().then(result => {
         console.log(result)
         return res.status(200).json({message: 'Post succesfully created...'})

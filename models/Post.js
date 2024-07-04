@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 
 const PostSchema = new mongoose.Schema({ 
     content: String,
+    channel: String,
+    color: String,
     identifier: String
 }, {timestamps: true});
 
