@@ -5,10 +5,6 @@ const bcrypt = require('bcrypt')
 
 const User = require('../models/User.js')
 
-router.get('/test', (req, res) => {
-    return res.json("Hello, world!");
-})
-
 router.post("/register", async (req, res) => {
     const {email, pass} = req.body;
     const hashedPass = bcrypt.hash(pass, 10);
