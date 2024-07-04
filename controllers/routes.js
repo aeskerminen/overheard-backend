@@ -66,4 +66,18 @@ router.post("/post", (req, res) => {
     })
 })
 
+router.get("/posts", (req, res) => {
+    const user = jwt.verify(req.cookies.token, process.env.SECRET)
+    if(user === undefined) {
+        return res.status(405).json({error: 'Unauthorized user...'})
+    }
+
+    Post.find({}).then(result => {
+        console.log(result)
+        return res.json(result)
+    }).catch(err => {
+        return res.status(405).json({error: 'Error finding posts...'})
+    });
+})
+
 module.exports = router
