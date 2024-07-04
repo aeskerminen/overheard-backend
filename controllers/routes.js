@@ -110,7 +110,7 @@ router.post("/posts/:id/upvote", (req, res) => {
 
     const id = req.params.id;
 
-    Vote.findOneAndUpdate({post_identifier: id}, {votes: $inc [1]}).then(result => {
+    Vote.findOneAndUpdate({post_identifier: id}, {$inc : {votes: 1}}).then(result => {
         return res.status(200).end()
     }).catch(err => {
         return res.status(404).json({error: 'Upvoting failed...'})
@@ -125,7 +125,7 @@ router.post("/posts/:id/downvote", (req, res) => {
 
     const id = req.params.id;
 
-    Vote.findOneAndUpdate({post_identifier: id}, {votes: $dec [1]}).then(result => {
+    Vote.findOneAndUpdate({post_identifier: id}, {$inc: {votes : -1}}).then(result => {
         return res.status(200).end()
     }).catch(err => {
         return res.status(404).json({error: 'Upvoting failed...'})
