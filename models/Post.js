@@ -5,6 +5,6 @@ const PostSchema = new mongoose.Schema({
     identifier: String
 }, {timestamps: true});
 
-const Post = mongoose.model('Post', PostSchema);v
+const Post = mongoose.model('Post', PostSchema);
 
 module.exports = Post

@@ -3,7 +3,8 @@ const router = require('express').Router()
 var jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt')
 
-const User = require('../models/User.js')
+const User = require('../models/User.js');
+const Post = require('../models/Post.js');
 
 router.post("/register", async (req, res) => {
     const {email, password} = req.body;
@@ -50,7 +51,18 @@ router.post("/post", (req, res) => {
     const {content} = req.body;
     console.log(req.cookies);
 
-    return res.json({message: 'Testing...'})
+    const user = jwt.verify(req.cookies.token, process.env.SECRET)
+    if(user === undefined) {
+        return res.status(405).json({error: 'Unauthorized user...'})
+    }
+
+    let post = new Post({content, identifier: crypto.randomUUID()})
+    post.save().then(result => {
+        console.log(result)
+        return res.status(200).json({message: 'Post succesfully created...'})
+    }).catch(err => {
+        return res.status(401).json({error: 'Failed to create post...'})
+    })
 })
 
 module.exports = router
