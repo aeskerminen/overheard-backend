@@ -7,6 +7,7 @@ const crypto = require('crypto')
 
 const User = require('../models/User.js');
 const Post = require('../models/Post.js');
+const Vote = require('../models/Vote.js');
 
 router.post("/register", async (req, res) => {
     const {email, password} = req.body;
@@ -57,7 +58,13 @@ router.post("/post", (req, res) => {
         return res.status(405).json({error: 'Unauthorized user...'})
     }
 
-    let post = new Post({content, channel, color, identifier: crypto.randomUUID()})
+    const identifier = crypto.randomUUID()
+
+    let post = new Post({content, channel, color, identifier})
+    let vote = new Vote({votes: 0, post_identifier: identifier})
+
+    vote.save().then(result => {})
+
     post.save().then(result => {
         console.log(result)
         return res.status(200).json({message: 'Post succesfully created...'})
@@ -79,5 +86,51 @@ router.get("/posts", (req, res) => {
         return res.status(405).json({error: 'Error finding posts...'})
     });
 })
+
+router.get("/posts/:id/votes", (req, res) => {
+    const user = jwt.verify(req.cookies.token, process.env.SECRET)
+    if(user === undefined) {
+        return res.status(405).json({error: 'Unauthorized user...'})
+    }
+
+    const id = req.params.id;
+
+    Vote.find({post_identifier: id}).then(result => {
+        return res.json(result)
+    }).catch(err => {
+        return res.status(404).json({error: 'Votes not found...'})
+    })
+})
+
+router.post("/posts/:id/upvote", (req, res) => {
+    const user = jwt.verify(req.cookies.token, process.env.SECRET)
+    if(user === undefined) {
+        return res.status(405).json({error: 'Unauthorized user...'})
+    }
+
+    const id = req.params.id;
+
+    Vote.findOneAndUpdate({post_identifier: id}, {votes: $inc [1]}).then(result => {
+        return res.status(200).end()
+    }).catch(err => {
+        return res.status(404).json({error: 'Upvoting failed...'})
+    })
+})
+
+router.post("/posts/:id/downvote", (req, res) => {
+    const user = jwt.verify(req.cookies.token, process.env.SECRET)
+    if(user === undefined) {
+        return res.status(405).json({error: 'Unauthorized user...'})
+    }
+
+    const id = req.params.id;
+
+    Vote.findOneAndUpdate({post_identifier: id}, {votes: $dec [1]}).then(result => {
+        return res.status(200).end()
+    }).catch(err => {
+        return res.status(404).json({error: 'Upvoting failed...'})
+    })
+})
+
 
 module.exports = router
