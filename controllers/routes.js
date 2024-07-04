@@ -3,6 +3,8 @@ const router = require('express').Router()
 var jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt')
 
+const crypto = require('crypto')
+
 const User = require('../models/User.js');
 const Post = require('../models/Post.js');
 
@@ -49,7 +51,6 @@ router.post("/login", async (req, res) => {
 
 router.post("/post", (req, res) => {
     const {content} = req.body;
-    console.log(req.cookies);
 
     const user = jwt.verify(req.cookies.token, process.env.SECRET)
     if(user === undefined) {
