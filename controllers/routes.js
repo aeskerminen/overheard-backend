@@ -46,4 +46,11 @@ router.post("/login", async (req, res) => {
     }
 })
 
+router.post("/post", (req, res) => {
+    const {content} = req.body;
+    console.log(req.cookies);
+
+    return res.json({message: 'Testing...'})
+})
+
 module.exports = router
