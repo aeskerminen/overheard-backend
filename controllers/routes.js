@@ -99,7 +99,7 @@ router.get("/posts", (req, res) => {
     $lte: new Date(new Date().setUTCHours(23, 59, 59, 999)).toISOString(),
   };
 
-  Post.find({createdAt})
+  Post.find({ createdAt }, {}, { sort: { createdAt: -1 } })
     .then((result) => {
       console.log(result);
       return res.json(result);
