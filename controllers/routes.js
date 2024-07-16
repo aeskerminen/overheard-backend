@@ -38,8 +38,8 @@ router.post("/login", async (req, res) => {
 
     if(await bcrypt.compare(password, user[0].password)) {
         let payload = {
-            email: user.email,
-            id: user._id
+            email: user[0].email,
+            id: user[0]._id.toJSON()
         }
 
         var token = jwt.sign(payload, process.env.SECRET, { expiresIn: '1h' });
@@ -67,7 +67,7 @@ router.post("/post", (req, res) => {
 
     post.save().then(result => {
         console.log(result)
-        return res.status(200).json({message: 'Post succesfully created...'})
+        return res.status(200).json({message: 'Post succesfully created...', post})
     }).catch(err => {
         return res.status(401).json({error: 'Failed to create post...'})
     })
@@ -110,7 +110,7 @@ router.post("/posts/:id/upvote", (req, res) => {
 
     const id = req.params.id;
 
-    Vote.findOneAndUpdate({post_identifier: id}, {$inc : {votes: 1}}).then(result => {
+    Vote.findOneAndUpdate({post_identifier: id}, {$inc : {votes: 1}, $set: {[user.id]: "up"}}).then(result => {
         return res.status(200).end()
     }).catch(err => {
         return res.status(404).json({error: 'Upvoting failed...'})
@@ -125,7 +125,7 @@ router.post("/posts/:id/downvote", (req, res) => {
 
     const id = req.params.id;
 
-    Vote.findOneAndUpdate({post_identifier: id}, {$inc: {votes : -1}}).then(result => {
+    Vote.findOneAndUpdate({post_identifier: id}, {$inc: {votes : -1}, $set: {[user.id]: "down"}}).then(result => {
         return res.status(200).end()
     }).catch(err => {
         return res.status(404).json({error: 'Upvoting failed...'})

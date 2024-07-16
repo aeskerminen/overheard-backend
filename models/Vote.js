@@ -2,6 +2,10 @@ const mongoose = require('mongoose');
 
 const VoteSchema = new mongoose.Schema({ 
     votes: Number,
+    voters: {
+        type: Map,
+        of: String
+    },
     post_identifier: String,
 }, {timestamps: true});
 
