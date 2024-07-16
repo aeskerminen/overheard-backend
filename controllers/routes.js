@@ -71,7 +71,7 @@ router.post("/post", (req, res) => {
   const identifier = crypto.randomUUID();
 
   let post = new Post({ content, channel, color, identifier });
-  let vote = new Vote({ votes: 0, post_identifier: identifier });
+  let vote = new Vote({ votes: 0, post_identifier: identifier, voters: {} });
 
   vote.save().then((result) => {});
 
@@ -126,7 +126,7 @@ router.get("/posts/:id/votes", (req, res) => {
     });
 });
 
-router.post("/posts/:id/upvote", (req, res) => {
+router.post("/posts/:id/upvote", async (req, res) => {
   const user = jwt.verify(req.cookies.token, process.env.SECRET);
   if (user === undefined) {
     return res.status(405).json({ error: "Unauthorized user..." });
@@ -134,19 +134,29 @@ router.post("/posts/:id/upvote", (req, res) => {
 
   const id = req.params.id;
 
-  Vote.findOneAndUpdate(
-    { post_identifier: id },
-    { $inc: { votes: 1 }, $set: { [user.id]: "up" } }
-  )
-    .then((result) => {
-      return res.status(200).end();
-    })
-    .catch((err) => {
-      return res.status(404).json({ error: "Upvoting failed..." });
-    });
+  const vote = (await Vote.find({ post_identifier: id }).lean())[0];
+
+  console.log(vote.voters);
+  console.log(user.id);
+  console.log(vote.voters[user.id]);
+
+  const ustring = `voters.${user.id}`;
+
+  if (vote.voters[user.id] !== "up" && vote.voters[user.id] !== "down") {
+    Vote.findOneAndUpdate(
+      { post_identifier: id },
+      { $inc: { votes: 1 }, $set: { ustring: "up" } }
+    )
+      .then((result) => {
+        return res.status(200).end();
+      })
+      .catch((err) => {
+        return res.status(404).json({ error: "Upvoting failed..." });
+      });
+  }
 });
 
-router.post("/posts/:id/downvote", (req, res) => {
+router.post("/posts/:id/downvote", async (req, res) => {
   const user = jwt.verify(req.cookies.token, process.env.SECRET);
   if (user === undefined) {
     return res.status(405).json({ error: "Unauthorized user..." });
@@ -154,16 +164,22 @@ router.post("/posts/:id/downvote", (req, res) => {
 
   const id = req.params.id;
 
-  Vote.findOneAndUpdate(
-    { post_identifier: id },
-    { $inc: { votes: -1 }, $set: { [user.id]: "down" } }
-  )
-    .then((result) => {
-      return res.status(200).end();
-    })
-    .catch((err) => {
-      return res.status(404).json({ error: "Upvoting failed..." });
-    });
+  const vote = await (await Vote.find({ post_identifier: id }).lean())[0];
+
+  const ustring = `voters.${user.id}`;
+
+  if (vote.voters[user.id] !== "up" && vote.voters[user.id] !== "down") {
+    Vote.findOneAndUpdate(
+      { post_identifier: id },
+      { $inc: { votes: -1 }, $set: { ustring: "down" } }
+    )
+      .then((result) => {
+        return res.status(200).end();
+      })
+      .catch((err) => {
+        return res.status(404).json({ error: "Upvoting failed..." });
+      });
+  }
 });
 
 module.exports = router;
