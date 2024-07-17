@@ -136,16 +136,15 @@ router.post("/posts/:id/upvote", async (req, res) => {
 
   const vote = (await Vote.find({ post_identifier: id }).lean())[0];
 
-  console.log(vote.voters);
-  console.log(user.id);
-  console.log(vote.voters[user.id]);
-
   const ustring = `voters.${user.id}`;
+
+  console.log("VOTE: ", vote);
+  console.log("USER: ", user.id);
 
   if (vote.voters[user.id] !== "up" && vote.voters[user.id] !== "down") {
     Vote.findOneAndUpdate(
       { post_identifier: id },
-      { $inc: { votes: 1 }, $set: { ustring: "up" } }
+      { $inc: { votes: 1 }, $set: { [`voters.${user.id}`]: "up" } }
     )
       .then((result) => {
         return res.status(200).end();
@@ -169,7 +168,7 @@ router.post("/posts/:id/unvote", async (req, res) => {
 
   Vote.findOneAndUpdate(
     { post_identifier: id },
-    { $inc: { votes: 1 }, $unset: { ustring: "" } }
+    { $inc: { votes: 1 }, $unset: { [`voters.${user.id}`]: "" } }
   )
     .then((result) => {
       return res.status(200).end();
@@ -194,7 +193,7 @@ router.post("/posts/:id/downvote", async (req, res) => {
   if (vote.voters[user.id] !== "up" && vote.voters[user.id] !== "down") {
     Vote.findOneAndUpdate(
       { post_identifier: id },
-      { $inc: { votes: -1 }, $set: { ustring: "down" } }
+      { $inc: { votes: -1 }, $set: { [`voters.${user.id}`]: "down" } }
     )
       .then((result) => {
         return res.status(200).end();
