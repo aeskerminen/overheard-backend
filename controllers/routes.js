@@ -156,6 +156,29 @@ router.post("/posts/:id/upvote", async (req, res) => {
   }
 });
 
+router.post("/posts/:id/unvote", async (req, res) => {
+  const user = jwt.verify(req.cookies.token, process.env.SECRET);
+  if (user === undefined) {
+    return res.status(405).json({ error: "Unauthorized user..." });
+  }
+
+  const id = req.params.id;
+
+  const vote = (await Vote.find({ post_identifier: id }).lean())[0];
+  const ustring = `voters.${user.id}`;
+
+  Vote.findOneAndUpdate(
+    { post_identifier: id },
+    { $inc: { votes: 1 }, $unset: { ustring: "" } }
+  )
+    .then((result) => {
+      return res.status(200).end();
+    })
+    .catch((err) => {
+      return res.status(404).json({ error: "Unvoting failed..." });
+    });
+});
+
 router.post("/posts/:id/downvote", async (req, res) => {
   const user = jwt.verify(req.cookies.token, process.env.SECRET);
   if (user === undefined) {
