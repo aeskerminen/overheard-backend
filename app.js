@@ -8,7 +8,9 @@ const config = require('./utils/config.js')
 
 require('dotenv').config()
 
-const router = require('./controllers/routes')
+const router = require('./controllers/postRouter.js')
+const postRouter = require('./controllers/postRouter.js')
+const userRouter = require('./controllers/userRouter.js')
 
 mongoose.set("strictQuery", false)
 mongoose.connect(config.URL)
@@ -20,7 +22,8 @@ app.use(cookieParser())
 
 app.use(morgan('tiny'))
 
-app.use("/api", router)
+app.use("/api/posts", postRouter)
+app.use("/api/users", userRouter)
 
 
 
