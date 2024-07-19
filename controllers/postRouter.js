@@ -9,7 +9,7 @@ const User = require("../models/User.js");
 const Post = require("../models/Post.js");
 const Vote = require("../models/Vote.js");
 
-postRouter.post("/post", (req, res) => {
+postRouter.post("/", (req, res) => {
   const { content, channel, color } = req.body;
 
   const user = jwt.verify(req.cookies.token, process.env.SECRET);
