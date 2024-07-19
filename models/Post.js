@@ -1,12 +1,16 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const PostSchema = new mongoose.Schema({ 
+const PostSchema = new mongoose.Schema(
+  {
     content: String,
     channel: String,
     color: String,
-    identifier: String
-}, {timestamps: true});
+    identifier: String,
+    votes: { type: mongoose.Schema.Types.ObjectId, ref: "Vote" },
+  },
+  { timestamps: true }
+);
 
-const Post = mongoose.model('Post', PostSchema);
+const Post = mongoose.model("Post", PostSchema);
 
-module.exports = Post
+module.exports = Post;

@@ -54,7 +54,7 @@ router.post("/login", async (req, res) => {
     return res
       .cookie("token", token, { httpOnly: true, sameSite: "strict" })
       .status(200)
-      .json({ message: "Logged in succesfully..." });
+      .json({ message: "Logged in succesfully...", id: payload.id });
   } else {
     return res.status(401).json({ error: "Invalid user or password..." });
   }
@@ -72,6 +72,8 @@ router.post("/post", (req, res) => {
 
   let post = new Post({ content, channel, color, identifier });
   let vote = new Vote({ votes: 0, post_identifier: identifier, voters: {} });
+
+  post.votes = vote;
 
   vote.save().then((result) => {});
 
@@ -100,6 +102,7 @@ router.get("/posts", (req, res) => {
   };
 
   Post.find({ createdAt }, {}, { sort: { createdAt: -1 } })
+    .populate("votes")
     .then((result) => {
       console.log(result);
       return res.json(result);
@@ -164,11 +167,12 @@ router.post("/posts/:id/unvote", async (req, res) => {
   const id = req.params.id;
 
   const vote = (await Vote.find({ post_identifier: id }).lean())[0];
-  const ustring = `voters.${user.id}`;
+
+  const amount = vote.voters[user.id] === "up" ? -1 : 1;
 
   Vote.findOneAndUpdate(
     { post_identifier: id },
-    { $inc: { votes: 1 }, $unset: { [`voters.${user.id}`]: "" } }
+    { $inc: { votes: amount }, $unset: { [`voters.${user.id}`]: "" } }
   )
     .then((result) => {
       return res.status(200).end();
