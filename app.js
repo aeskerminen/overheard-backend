@@ -25,6 +25,4 @@ app.use(morgan('tiny'))
 app.use("/api/posts", postRouter)
 app.use("/api/users", userRouter)
 
-
-
 module.exports = app

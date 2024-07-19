@@ -39,7 +39,7 @@ postRouter.post("/post", (req, res) => {
     });
 });
 
-postRouter.get("/posts", (req, res) => {
+postRouter.get("/", (req, res) => {
   const user = jwt.verify(req.cookies.token, process.env.SECRET);
   if (user === undefined) {
     return res.status(405).json({ error: "Unauthorized user..." });
@@ -61,7 +61,7 @@ postRouter.get("/posts", (req, res) => {
     });
 });
 
-postRouter.get("/posts/:id/votes", (req, res) => {
+postRouter.get("/:id/votes", (req, res) => {
   const user = jwt.verify(req.cookies.token, process.env.SECRET);
   if (user === undefined) {
     return res.status(405).json({ error: "Unauthorized user..." });
@@ -78,7 +78,7 @@ postRouter.get("/posts/:id/votes", (req, res) => {
     });
 });
 
-postRouter.post("/posts/:id/upvote", async (req, res) => {
+postRouter.post("/:id/upvote", async (req, res) => {
   const user = jwt.verify(req.cookies.token, process.env.SECRET);
   if (user === undefined) {
     return res.status(405).json({ error: "Unauthorized user..." });
@@ -107,7 +107,7 @@ postRouter.post("/posts/:id/upvote", async (req, res) => {
   }
 });
 
-postRouter.post("/posts/:id/unvote", async (req, res) => {
+postRouter.post("/:id/unvote", async (req, res) => {
   const user = jwt.verify(req.cookies.token, process.env.SECRET);
   if (user === undefined) {
     return res.status(405).json({ error: "Unauthorized user..." });
@@ -131,7 +131,7 @@ postRouter.post("/posts/:id/unvote", async (req, res) => {
     });
 });
 
-postRouter.post("/posts/:id/downvote", async (req, res) => {
+postRouter.post("/:id/downvote", async (req, res) => {
   const user = jwt.verify(req.cookies.token, process.env.SECRET);
   if (user === undefined) {
     return res.status(405).json({ error: "Unauthorized user..." });
