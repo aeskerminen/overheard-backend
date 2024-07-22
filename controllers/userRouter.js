@@ -49,7 +49,7 @@ userRouter.post("/login", async (req, res) => {
       id: user[0]._id.toJSON(),
     };
 
-    var token = jwt.sign(payload, process.env.SECRET, { expiresIn: "1h" });
+    var token = jwt.sign(payload, process.env.SECRET, { expiresIn: "24h" });
 
     return res
       .cookie("token", token, { httpOnly: true, sameSite: "strict" })
