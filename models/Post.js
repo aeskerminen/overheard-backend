@@ -7,6 +7,7 @@ const PostSchema = new mongoose.Schema(
     color: String,
     identifier: String,
     votes: { type: mongoose.Schema.Types.ObjectId, ref: "Vote" },
+    forum: {type: mongoose.Schema.Types.ObjectId, ref: "Forum"}
   },
   { timestamps: true }
 );
