@@ -8,8 +8,9 @@ const crypto = require("crypto");
 const User = require("../models/User.js");
 const Post = require("../models/Post.js");
 const Vote = require("../models/Vote.js");
+const Forum = require("../models/Forum.js");
 
-postRouter.post("/", (req, res) => {
+postRouter.post("/", async (req, res) => {
   const { content, channel, color } = req.body;
 
   const user = jwt.verify(req.cookies.token, process.env.SECRET);
@@ -21,10 +22,13 @@ postRouter.post("/", (req, res) => {
 
   let post = new Post({ content, channel, color, identifier });
   let vote = new Vote({ votes: 0, post_identifier: identifier, voters: {} });
+  let forum = new Forum({ userMap: {}, comments: [] });
 
   post.votes = vote;
+  post.forum = forum;
 
-  vote.save().then((result) => {});
+  await vote.save();
+  await forum.save();
 
   post
     .save()
@@ -52,6 +56,7 @@ postRouter.get("/", (req, res) => {
 
   Post.find({ createdAt }, {}, { sort: { createdAt: -1 } })
     .populate("votes")
+    .populate("forum")
     .then((result) => {
       console.log(result);
       return res.json(result);
@@ -59,6 +64,19 @@ postRouter.get("/", (req, res) => {
     .catch((err) => {
       return res.status(405).json({ error: "Error finding posts..." });
     });
+});
+
+postRouter.post("/:id/comments", async (req, res) => {
+  const user = jwt.verify(req.cookies.token, process.env.SECRET);
+  const body = req.body;
+  if (user === undefined) {
+    return res.status(405).json({ error: "Unauthorized user..." });
+  }
+
+  const id = req.params.id;
+
+  let post = await Post.findById(id);
+  console.log("COMMENTING:", body);
 });
 
 postRouter.get("/:id/votes", (req, res) => {
