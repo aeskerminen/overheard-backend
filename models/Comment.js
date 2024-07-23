@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const VoteSchema = new mongoose.Schema(
+const CommentSchema = new mongoose.Schema(
   {
     content: String, 
     userID: String,
@@ -8,6 +8,6 @@ const VoteSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Vote = mongoose.model("Vote", VoteSchema);
+const Comment = mongoose.model("Comment", CommentSchema);
 
-module.exports = Vote;
+module.exports = Comment;

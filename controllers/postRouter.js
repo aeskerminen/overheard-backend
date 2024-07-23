@@ -9,6 +9,7 @@ const User = require("../models/User.js");
 const Post = require("../models/Post.js");
 const Vote = require("../models/Vote.js");
 const Forum = require("../models/Forum.js");
+const Comment = require("../models/Comment.js");
 
 postRouter.post("/", async (req, res) => {
   const { content, channel, color } = req.body;
@@ -76,7 +77,19 @@ postRouter.post("/:id/comments", async (req, res) => {
   const id = req.params.id;
 
   let post = await Post.findById(id);
+  await post.populate("forum");
+
   console.log("COMMENTING:", body);
+  console.log(post.forum);
+
+  let comment = new Comment({ content: body.content, userID: user._id });
+
+  post.forum.comments.push(comment);
+
+  await post.forum.save();
+  await post.save();
+
+  console.log(post.forum);
 });
 
 postRouter.get("/:id/votes", (req, res) => {
