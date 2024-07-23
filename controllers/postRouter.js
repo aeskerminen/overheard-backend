@@ -57,9 +57,13 @@ postRouter.get("/", (req, res) => {
 
   Post.find({ createdAt }, {}, { sort: { createdAt: -1 } })
     .populate("votes")
-    .populate("forum")
+    .populate([
+      {
+        path: "forum",
+        populate: [{ path: "comments" }],
+      },
+    ])
     .then((result) => {
-      console.log(result);
       return res.json(result);
     })
     .catch((err) => {
@@ -86,6 +90,7 @@ postRouter.post("/:id/comments", async (req, res) => {
 
   post.forum.comments.push(comment);
 
+  await comment.save();
   await post.forum.save();
   await post.save();
 
