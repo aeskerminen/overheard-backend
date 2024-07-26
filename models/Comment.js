@@ -2,8 +2,9 @@ const mongoose = require("mongoose");
 
 const CommentSchema = new mongoose.Schema(
   {
-    content: String, 
+    content: String,
     userID: String,
+    num: Number,
   },
   { timestamps: true }
 );

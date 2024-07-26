@@ -83,18 +83,37 @@ postRouter.post("/:id/comments", async (req, res) => {
   let post = await Post.findById(id);
   await post.populate("forum");
 
-  console.log("COMMENTING:", body);
-  console.log(post.forum);
+  let fr = await Forum.findById(post.forum._id).lean();
+  const m = fr.userMap;
+  console.log(fr.userMap);
+  console.log(m[user.id]);
+  console.log(user.id);
 
-  let comment = new Comment({ content: body.content, userID: user._id });
+  let userNum;
+  if (m[user.id] === undefined) {
+    await Forum.findByIdAndUpdate(post.forum._id, {
+      $set: { [`userMap.${user.id}`]: post.forum.curNum },
+      $inc: { curNum: 1 },
+    });
+    userNum = post.forum.curNum;
+  } else {
+    userNum = m[user.id];
+  }
+
+  //console.log("COMMENTING:", body);
+  //console.log(post.forum);
+
+  let comment = new Comment({
+    content: body.content,
+    num: userNum,
+    userID: user._id,
+  });
 
   post.forum.comments.push(comment);
 
   await comment.save();
   await post.forum.save();
   await post.save();
-
-  console.log(post.forum);
 });
 
 postRouter.get("/:id/votes", (req, res) => {
