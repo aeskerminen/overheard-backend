@@ -1,11 +1,8 @@
 const postRouter = require("express").Router();
 
 var jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
-
 const crypto = require("crypto");
 
-const User = require("../models/User.js");
 const Post = require("../models/Post.js");
 const Vote = require("../models/Vote.js");
 const Forum = require("../models/Forum.js");
@@ -55,15 +52,24 @@ postRouter.get("/", (req, res) => {
     $lte: new Date(new Date().setUTCHours(23, 59, 59, 999)).toISOString(),
   };
 
-  Post.find({ createdAt }, {}, { sort: { createdAt: -1 } })
-    .populate("votes")
+  Post.find({ createdAt }, {}, { sort: { createdAt: -1 }, select: 'identifier channel color content forum votes createdAt'})
+    .populate([{path: "votes", select: "voters votes"}])
     .populate([
       {
         path: "forum",
-        populate: [{ path: "comments" }],
+        select: "comments",
+        populate: [{ path: "comments", select: "content num userID" }],
       },
     ])
+    .lean()
     .then((result) => {
+      result.forEach((r) => {
+        r.forum.comments.forEach((c) => {
+          c.own = c.userID === user.id ? true : false;
+          delete c.userID;
+          delete c._id;
+        });
+      });
       return res.json(result);
     })
     .catch((err) => {
@@ -85,9 +91,6 @@ postRouter.post("/:id/comments", async (req, res) => {
 
   let fr = await Forum.findById(post.forum._id).lean();
   const m = fr.userMap;
-  console.log(fr.userMap);
-  console.log(m[user.id]);
-  console.log(user.id);
 
   let userNum;
   if (m[user.id] === undefined) {
@@ -100,13 +103,10 @@ postRouter.post("/:id/comments", async (req, res) => {
     userNum = m[user.id];
   }
 
-  //console.log("COMMENTING:", body);
-  //console.log(post.forum);
-
   let comment = new Comment({
     content: body.content,
     num: userNum,
-    userID: user._id,
+    userID: user.id,
   });
 
   post.forum.comments.push(comment);
