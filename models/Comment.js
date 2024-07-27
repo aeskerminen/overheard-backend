@@ -5,6 +5,7 @@ const CommentSchema = new mongoose.Schema(
     content: String,
     userID: String,
     num: Number,
+    votes: { type: mongoose.Schema.Types.ObjectId, ref: "Vote" },
   },
   { timestamps: true }
 );

@@ -52,13 +52,26 @@ postRouter.get("/", (req, res) => {
     $lte: new Date(new Date().setUTCHours(23, 59, 59, 999)).toISOString(),
   };
 
-  Post.find({ createdAt }, {}, { sort: { createdAt: -1 }, select: 'identifier channel color content forum votes createdAt'})
-    .populate([{path: "votes", select: "voters votes"}])
+  Post.find(
+    { createdAt },
+    {},
+    {
+      sort: { createdAt: -1 },
+      select: "identifier channel color content forum votes createdAt",
+    }
+  )
+    .populate([{ path: "votes", select: "voters votes" }])
     .populate([
       {
         path: "forum",
         select: "comments",
-        populate: [{ path: "comments", select: "content num userID createdAt" }],
+        populate: [
+          {
+            path: "comments",
+            select: "content num userID createdAt _id",
+            populate: [{ path: "votes" }],
+          },
+        ],
       },
     ])
     .lean()
@@ -67,7 +80,6 @@ postRouter.get("/", (req, res) => {
         r.forum.comments.forEach((c) => {
           c.own = c.userID === user.id ? true : false;
           delete c.userID;
-          delete c._id;
         });
       });
       return res.json(result);
@@ -108,6 +120,11 @@ postRouter.post("/:id/comments", async (req, res) => {
     num: userNum,
     userID: user.id,
   });
+
+  let vote = new Vote({ votes: 0, post_identifier: comment._id, voters: {} });
+  comment.votes = vote;
+
+  await vote.save();
 
   post.forum.comments.push(comment);
 
