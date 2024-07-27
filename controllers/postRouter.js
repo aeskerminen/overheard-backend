@@ -58,7 +58,7 @@ postRouter.get("/", (req, res) => {
       {
         path: "forum",
         select: "comments",
-        populate: [{ path: "comments", select: "content num userID" }],
+        populate: [{ path: "comments", select: "content num userID createdAt" }],
       },
     ])
     .lean()
