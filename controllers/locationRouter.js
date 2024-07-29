@@ -5,13 +5,15 @@ locationRouter.post("/:lat/:lon", async (req, res) => {
   const lat = req.params.lat;
   const lon = req.params.lon;
 
-  const offgridResponse = await axios.post(
-    `localhost:8000/api/data/${lat}/${lon}`
-  );
-
-  console.log(offgridResponse);
-
-  return res.json(offgridResponse);
+  axios
+    .get(`http://localhost:8000/api/data/${lat}/${lon}`)
+    .then((result) => {
+      return res.json(result.data.data);
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.status(400).end();
+    });
 });
 
 module.exports = locationRouter;
