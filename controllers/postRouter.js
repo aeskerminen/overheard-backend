@@ -47,13 +47,15 @@ postRouter.get("/", (req, res) => {
     return res.status(405).json({ error: "Unauthorized user..." });
   }
 
+  const location = req.query.location;
+
   const createdAt = {
     $gte: new Date(new Date().setUTCHours(0, 0, 0, 0)).toISOString(),
     $lte: new Date(new Date().setUTCHours(23, 59, 59, 999)).toISOString(),
   };
 
   Post.find(
-    { createdAt },
+    { createdAt, location },
     {},
     {
       sort: { createdAt: -1 },
