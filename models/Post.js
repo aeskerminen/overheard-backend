@@ -6,6 +6,7 @@ const PostSchema = new mongoose.Schema(
     channel: String,
     color: String,
     identifier: String,
+    location: String,
     votes: { type: mongoose.Schema.Types.ObjectId, ref: "Vote" },
     forum: {type: mongoose.Schema.Types.ObjectId, ref: "Forum"}
   },

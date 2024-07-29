@@ -9,7 +9,7 @@ const Forum = require("../models/Forum.js");
 const Comment = require("../models/Comment.js");
 
 postRouter.post("/", async (req, res) => {
-  const { content, channel, color } = req.body;
+  const { content, channel, color, location } = req.body;
 
   const user = jwt.verify(req.cookies.token, process.env.SECRET);
   if (user === undefined) {
@@ -18,7 +18,7 @@ postRouter.post("/", async (req, res) => {
 
   const identifier = crypto.randomUUID();
 
-  let post = new Post({ content, channel, color, identifier });
+  let post = new Post({ content, channel, color, identifier, location });
   let vote = new Vote({ votes: 0, post_identifier: identifier, voters: {} });
   let forum = new Forum({ userMap: {}, comments: [] });
 
