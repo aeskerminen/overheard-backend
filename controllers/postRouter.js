@@ -11,6 +11,8 @@ const Comment = require("../models/Comment.js");
 postRouter.post("/", async (req, res) => {
   const { content, channel, color, location } = req.body;
 
+  console.log("LOCAT: ", location);
+
   const user = jwt.verify(req.cookies.token, process.env.SECRET);
   if (user === undefined) {
     return res.status(405).json({ error: "Unauthorized user..." });
@@ -59,7 +61,7 @@ postRouter.get("/", (req, res) => {
     {},
     {
       sort: { createdAt: -1 },
-      select: "identifier channel color content forum votes createdAt",
+      select: "identifier channel color content location forum votes createdAt",
     }
   )
     .populate([{ path: "votes", select: "voters votes" }])
